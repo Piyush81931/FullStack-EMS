@@ -55,7 +55,41 @@ export const createEmployee = async (req, res)=>{
             joinDate: new Date(joinDate),
             bio: bio || "",
         })
-
+         try {
+            await sendEmail({
+                to: email,
+                subject: "Welcome to the Team – Your Account Details",
+                body: `
+                    <div style="max-width: 600px; font-family: Arial, sans-serif;">
+                        <h2>Welcome, ${firstName} ${lastName}! 👋</h2>
+                        <p style="font-size: 16px;">Your employee account has been created. Here are your login credentials:</p>
+                        <table style="font-size: 16px; width: 100%; border-collapse: collapse;">
+                            <tr style="background: #f4f4f4;">
+                                <td style="padding: 10px; font-weight: bold;">Email</td>
+                                <td style="padding: 10px;">${email}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px; font-weight: bold;">Temporary Password</td>
+                                <td style="padding: 10px;">${password}</td>
+                            </tr>
+                            <tr style="background: #f4f4f4;">
+                                <td style="padding: 10px; font-weight: bold;">Position</td>
+                                <td style="padding: 10px;">${position || "N/A"}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px; font-weight: bold;">Department</td>
+                                <td style="padding: 10px;">${department || "Engineering"}</td>
+                            </tr>
+                        </table>
+                        <p style="font-size: 16px; color: red;">⚠️ Please log in and change your password immediately.</p>
+                        <br/>
+                        <p style="font-size: 16px;">Best Regards,<br/><strong>HR Team</strong></p>
+                    </div>
+                `
+            });
+        } catch (emailError) {
+            console.error("Failed to send welcome email:", emailError.message);
+        }
         return res.status(201).json({success: true, employee})
     } catch (error) {
         if(error.code === 11000){
